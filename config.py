@@ -26,6 +26,9 @@ KEYWORD_LIST = ["gravitational lensing","Black hole","Blackhole","Galaxy","softw
 OPENAI_API_KEYS = os.getenv("OPENAI_API_KEYS")
 LANGUAGE = "zh"  # zh | en
 
-# 打印检查（调试用，生产环境不要打印密钥）
-# print(f"Loaded OpenAI Key: {OPENAI_API_KEYS is not None}")
-# print(f"Loaded GitHub Token: {TOKEN is not None}")
+# 确保它是一个字符串，而不是字符列表
+if not OPENAI_API_KEYS.startswith("sk-"):
+    print(f"❌ API Key 解析错误: {OPENAI_API_KEYS}")
+    exit(1)
+
+print(f"✅ Loaded OpenAI Key: {OPENAI_API_KEYS[:5]}********")

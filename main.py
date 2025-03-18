@@ -11,7 +11,21 @@ from get_paper_from_pdf import Paper
 
 from github_issue import make_github_issue
 
+# ------------------------
+import sys
+from dotenv import load_dotenv
 
+# 加载 .env 文件
+load_dotenv()
+OPENAI_API_KEYS = os.getenv("OPENAI_API_KEYS")
+if not OPENAI_API_KEYS:
+    print("❌ 错误：未正确加载 API Key！请检查 .env 文件")
+    exit(1)
+
+print(f"✅ API Key 加载成功: {OPENAI_API_KEYS[:5]}********")
+# ------------------------
+
+# 本地调试
 # os.environ["http_proxy"] = "http://127.0.0.1:8118"
 # os.environ["https_proxy"] = "http://127.0.0.1:8118"
 
@@ -46,8 +60,9 @@ class Reader:
 
         self.root_path = root_path
 
-        # 获取某个键对应的值        
-        self.chat_api_list = OPENAI_API_KEYS
+        # 获取某个键对应的值        changed
+        self.chat_api_list = [OPENAI_API_KEYS] if isinstance(OPENAI_API_KEYS, str) else []
+
 
         self.cur_api = 0
         self.file_format = args.file_format        
@@ -275,6 +290,12 @@ class Reader:
                     reraise=True)
     def chat_conclusion(self, text, conclusion_prompt_token = 800):
         openai.api_key = self.chat_api_list[self.cur_api]
+
+#----------
+        print(f"正在使用 OpenAI API Key: {self.chat_api_list[self.cur_api]}")  # 添加这行
+        openai.api_key = self.chat_api_list[self.cur_api]
+# ----------
+
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
         text_token = len(self.encoding.encode(text))
