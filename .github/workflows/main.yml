@@ -12,6 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     name: Backup
     timeout-minutes: 25
+    env:
+      OPENAI_API_KEYS: ${{ secrets.OPENAI_API_KEYS }}
+      TOKEN: ${{ secrets.TOKEN }}
     steps:
       -   uses: actions/checkout@v2
       -   name: Set up Python 3.9
@@ -31,11 +34,7 @@ jobs:
             commitMessage: Automated snapshot
 
       - name: Debug environment variables
-        env:
-          OPENAI_API_KEYS: ${{ secrets.OPENAI_API_KEYS }}
         run: echo "OPENAI_API_KEYS=${{ secrets.OPENAI_API_KEYS }}"
 
       - name: Run script
-        env:
-          OPENAI_API_KEYS: ${{ secrets.OPENAI_API_KEYS }}
         run: python main.py
