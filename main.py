@@ -30,7 +30,7 @@ print(f"✅ API Key 加载成功: {OPENAI_API_KEYS[:5]}********")
 
 
 
-def split_text_into_chunks(text, max_chunk_size=10000):
+def split_text_into_chunks(text, max_chunk_size=1000):
     """
     将文本拆分成多个块，每个块长度不超过 max_chunk_size（字符数）
     优先在换行符处拆分，保证内容格式较好。
@@ -52,7 +52,7 @@ def split_text_into_chunks(text, max_chunk_size=10000):
         start = end
     return chunks
 
-def create_issues_for_long_text(title, body, labels, max_chunk_size=10000):
+def create_issues_for_long_text(title, body, labels, max_chunk_size=1000):
     """
     根据 body 内容拆分为多个块，并依次创建 Issue，标题后添加 -1、-2 ...
     """
