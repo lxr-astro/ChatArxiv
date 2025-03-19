@@ -27,7 +27,46 @@ if not OPENAI_API_KEYS:
     print("❌ 错误：未正确加载 API Key！请检查 GitHub Secrets 或 .env 文件")
     exit(1)
 print(f"✅ API Key 加载成功: {OPENAI_API_KEYS[:5]}********")
-# ------------------------e
+
+
+
+def split_text_into_chunks(text, max_chunk_size=30000):
+    """
+    将文本拆分成多个块，每个块长度不超过 max_chunk_size（字符数）
+    优先在换行符处拆分，保证内容格式较好。
+    """
+    chunks = []
+    start = 0
+    text_length = len(text)
+    while start < text_length:
+        # 计算剩余部分是否已经小于 max_chunk_size
+        if text_length - start <= max_chunk_size:
+            chunks.append(text[start:])
+            break
+        # 尝试在 max_chunk_size 范围内找最后一个换行符作为拆分点
+        end = text.rfind("\n", start, start + max_chunk_size)
+        if end == -1 or end <= start:
+            # 如果找不到换行符，则直接强制切分
+            end = start + max_chunk_size
+        chunks.append(text[start:end])
+        start = end
+    return chunks
+
+def create_issues_for_long_text(title, body, labels, max_chunk_size=30000):
+    """
+    根据 body 内容拆分为多个块，并依次创建 Issue，标题后添加 -1、-2 ...
+    """
+    chunks = split_text_into_chunks(body, max_chunk_size)
+    issues = []
+    for idx, chunk in enumerate(chunks, start=1):
+        issue_title = f"{title}-{idx}"
+        # 调用你已有的 make_github_issue 函数创建 Issue
+        issue = make_github_issue(title=issue_title, body=chunk, labels=labels)
+        issues.append(issue)
+        print(f"Successfully created Issue \"{issue_title}\"")
+    return issues
+
+# ------------------------
 
 # 本地调试
 # os.environ["http_proxy"] = "http://127.0.0.1:8118"
@@ -513,8 +552,13 @@ def main(args):
             reader1.summary_with_chat(paper_list=paper_list, htmls=htmls)
             # htmls.append("#######test#########")
             htmls_body += htmls
+        # 在全部模式下，生成 Markdown 文件后：
         save_to_file(htmls_body, date_str=title, root_path='./')
-        make_github_issue(title=title, body="\n".join(htmls_body), labels=args.filter_keys)
+        # 原先是：make_github_issue(title=title, body="\n".join(htmls_body), labels=args.filter_keys)
+        # 替换为拆分创建 Issue：
+        full_body = "\n".join(htmls_body)
+        create_issues_for_long_text(title=title, body=full_body, labels=args.filter_keys)
+
 
 # if __name__ == '__main__':    
 #     parser = argparse.ArgumentParser()
@@ -586,7 +630,7 @@ if __name__ == '__main__':
             save_to_file(htmls_body, date_str=title, root_path='./')
     # 如果选择仅创建 Issue
     elif args.mode == "create-issue":
-        # 假设最新的 Markdown 文件在 export/ 目录，文件名以当前日期开头
+        # 假设最新的 Markdown 文件在 export/ 目录，以当前日期为文件名
         title = str(now)[:13].replace(' ', '-')
         file_path = os.path.join("export", f"{title}.{args.file_format}")
         if not os.path.exists(file_path):
@@ -594,7 +638,8 @@ if __name__ == '__main__':
             exit(1)
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
-        make_github_issue(title=title, body=content, labels=args.filter_keys)
+        create_issues_for_long_text(title=title, body=content, labels=args.filter_keys)
+
     # 如果选择全部（默认），生成 Markdown 文件并创建 Issue
     else:
         if args.pdf_path:
