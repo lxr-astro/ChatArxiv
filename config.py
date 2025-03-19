@@ -20,7 +20,7 @@ REPO_NAME = 'ChatArxiv'
 NEW_SUB_URL = 'https://arxiv.org/list/astro-ph.GA/recent'
 
 # Keywords to search
-KEYWORD_LIST = ["Black hole","Blackhole","Galaxy","machine learning"]
+KEYWORD_LIST = ["black hole","blackhole","galaxy","galaxies","machine learning","AGN","ALMA"]
 
 # API???
 OPENAI_API_KEYS = os.getenv("OPENAI_API_KEYS")
