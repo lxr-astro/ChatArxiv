@@ -11,4 +11,5 @@ openai==0.27.0
 markdown
 # new add
 numpy
+pytz
 python-dotenv # for private and venv .env
