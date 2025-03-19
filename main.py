@@ -606,21 +606,24 @@ if __name__ == '__main__':
                         if filename.endswith(".pdf"):
                             paper_list.append(Paper(path=os.path.join(root, filename)))
             reader.summary_with_chat(paper_list=paper_list)
-        else:
-            filter_times_span = (now - timedelta(days=args.filter_times_span), now)
-            title = str(now)[:13].replace(' ', '-')
-            htmls_body = []
-            for filter_key in args.filter_keys.split(" "):
-                query = " AND ".join(f"all:{item}" for item in filter_key.split())
-                htmls = [f'# {filter_key}']
-                reader = Reader(key_word=filter_key, query=query, filter_keys=filter_key, filter_times_span=filter_times_span, sort=arxiv.SortCriterion.LastUpdatedDate, args=args)
-                reader.show_info()
-                filter_results = reader.filter_arxiv(max_results=args.max_results)
-                paper_list = reader.download_pdf(filter_results)
-                reader.summary_with_chat(paper_list=paper_list, htmls=htmls)
-                htmls_body += htmls
-            save_to_file(htmls_body, date_str=title, root_path='./')
-            make_github_issue(title=title, body="\n".join(htmls_body), labels=args.filter_keys)
+
+
+    else:
+        filter_times_span = (now - timedelta(days=args.filter_times_span), now)
+        title = str(now)[:13].replace(' ', '-')
+        htmls_body = []
+        for filter_key in args.filter_keys:  # 直接遍历列表
+            query = " AND ".join(f"all:{item}" for item in filter_key.split())
+            htmls = [f'# {filter_key}']
+            reader = Reader(key_word=filter_key, query=query, filter_keys=filter_key, filter_times_span=filter_times_span, sort=arxiv.SortCriterion.LastUpdatedDate, args=args)
+            reader.show_info()
+            filter_results = reader.filter_arxiv(max_results=args.max_results)
+            paper_list = reader.download_pdf(filter_results)
+            reader.summary_with_chat(paper_list=paper_list, htmls=htmls)
+            htmls_body += htmls
+        save_to_file(htmls_body, date_str=title, root_path='./')
+        make_github_issue(title=title, body="\n".join(htmls_body), labels=args.filter_keys)
+
             
     print("summary time:", time.time() - start_time)
 
