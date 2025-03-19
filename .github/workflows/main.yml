@@ -30,6 +30,10 @@ jobs:
           with:
             commitMessage: Automated snapshot
 
+      -   name: Debug environment variables
+          run: echo "OPENAI_API_KEYS=${{ secrets.OPENAI_API_KEYS[:5] }}"
+
+
       -   name: Run script
           env:
             OPENAI_API_KEYS: ${{ secrets.OPENAI_API_KEYS }}
