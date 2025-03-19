@@ -57,13 +57,14 @@ def create_issues_for_long_text(title, body, labels, max_chunk_size=10000):
     根据 body 内容拆分为多个块，并依次创建 Issue，标题后添加 -1、-2 ...
     """
     chunks = split_text_into_chunks(body, max_chunk_size)
+    print(f"DEBUG: Splitting into {len(chunks)} chunks")
     issues = []
     for idx, chunk in enumerate(chunks, start=1):
         issue_title = f"{title}-{idx}"
         # 调用你已有的 make_github_issue 函数创建 Issue
         issue = make_github_issue(title=issue_title, body=chunk, labels=labels)
         issues.append(issue)
-        print(f"Successfully created Issue \"{issue_title}\"")
+        print(f"Successfully created Issue \"{issue_title}\" (chunk length: {len(chunk)})")
     return issues
 
 # ------------------------
@@ -554,9 +555,12 @@ def main(args):
             htmls_body += htmls
         # 在全部模式下，生成 Markdown 文件后：
         save_to_file(htmls_body, date_str=title, root_path='./')
+# -----------------------
         # 原先是：make_github_issue(title=title, body="\n".join(htmls_body), labels=args.filter_keys)
         # 替换为拆分创建 Issue：
         full_body = "\n".join(htmls_body)
+        chunks = split_text_into_chunks(body, max_chunk_size)
+        print(f"DEBUG: Total length = {len(body)}, split into {len(chunks)} chunks")
         create_issues_for_long_text(title=title, body=full_body, labels=args.filter_keys)
 
 
