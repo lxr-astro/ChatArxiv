@@ -30,60 +30,60 @@ print(f"✅ API Key 加载成功: {OPENAI_API_KEYS[:5]}********")
 
 
 
-def split_text_into_chunks(text, max_chunk_size=10000):
+def split_text_into_chunks(text, max_chunk_size=30000):
     """
     将文本拆分成多个块，每个块长度不超过 max_chunk_size（字符数）
     优先在换行符处拆分，保证内容格式较好。
     """
-    # chunks = []
-    # start = 0
-    # text_length = len(text)
-    # while start < text_length:
-    #     # 计算剩余部分是否已经小于 max_chunk_size
-    #     if text_length - start <= max_chunk_size:
-    #         chunks.append(text[start:])
-    #         break
-    #     # 尝试在 max_chunk_size 范围内找最后一个换行符作为拆分点
-    #     end = text.rfind("\n", start, start + max_chunk_size)
-    #     if end == -1 or end <= start:
-    #         # 如果找不到换行符，则直接强制切分
-    #         end = start + max_chunk_size
-    #     chunks.append(text[start:end])
-    #     start = end
-    # return chunks
-    return [text[i:i+max_chunk_size] for i in range(0, len(text), max_chunk_size)]
+    chunks = []
+    start = 0
+    text_length = len(text)
+    while start < text_length:
+        # 计算剩余部分是否已经小于 max_chunk_size
+        if text_length - start <= max_chunk_size:
+            chunks.append(text[start:])
+            break
+        # 尝试在 max_chunk_size 范围内找最后一个换行符作为拆分点
+        end = text.rfind("\n", start, start + max_chunk_size)
+        if end == -1 or end <= start:
+            # 如果找不到换行符，则直接强制切分
+            end = start + max_chunk_size
+        chunks.append(text[start:end])
+        start = end
+    return chunks
+    # return [text[i:i+max_chunk_size] for i in range(0, len(text), max_chunk_size)]
 
-def create_issues_for_long_text(title, body, labels, max_chunk_size=10000):
+def create_issues_for_long_text(title, body, labels, max_chunk_size=30000):
     """
     根据 body 内容拆分为多个块，并依次创建 Issue，标题后添加 -1、-2 ...
     """
-    # chunks = split_text_into_chunks(body, max_chunk_size)
-    # print(f"DEBUG: Splitting into {len(chunks)} chunks")
-    # issues = []
-    # for idx, chunk in enumerate(chunks, start=1):
-    #     issue_title = f"{title}-{idx}"
-    #     # 调用你已有的 make_github_issue 函数创建 Issue
-    #     issue = make_github_issue(title=issue_title, body=chunk, labels=labels)
-    #     issues.append(issue)
-    #     print(f"Successfully created Issue \"{issue_title}\" (chunk length: {len(chunk)})")
-    # return issues
-
-    print(f"DEBUG: Total body length: {len(body)}")
     chunks = split_text_into_chunks(body, max_chunk_size)
     print(f"DEBUG: Splitting into {len(chunks)} chunks")
     issues = []
     for idx, chunk in enumerate(chunks, start=1):
-        # 如果块内容太短或仅包含空白，则跳过
-        if not chunk.strip():
-            print(f"DEBUG: Chunk {idx} is empty or whitespace, skipping")
-            continue
-        # 输出前 100 个字符用于调试
-        print(f"DEBUG: Chunk {idx} preview (length {len(chunk)}): {chunk[:100]!r}")
         issue_title = f"{title}-{idx}"
+        # 调用你已有的 make_github_issue 函数创建 Issue
         issue = make_github_issue(title=issue_title, body=chunk, labels=labels)
         issues.append(issue)
         print(f"Successfully created Issue \"{issue_title}\" (chunk length: {len(chunk)})")
     return issues
+
+    # print(f"DEBUG: Total body length: {len(body)}")
+    # chunks = split_text_into_chunks(body, max_chunk_size)
+    # print(f"DEBUG: Splitting into {len(chunks)} chunks")
+    # issues = []
+    # for idx, chunk in enumerate(chunks, start=1):
+    #     # 如果块内容太短或仅包含空白，则跳过
+    #     if not chunk.strip():
+    #         print(f"DEBUG: Chunk {idx} is empty or whitespace, skipping")
+    #         continue
+    #     # 输出前 100 个字符用于调试
+    #     print(f"DEBUG: Chunk {idx} preview (length {len(chunk)}): {chunk[:100]!r}")
+    #     issue_title = f"{title}-{idx}"
+    #     issue = make_github_issue(title=issue_title, body=chunk, labels=labels)
+    #     issues.append(issue)
+    #     print(f"Successfully created Issue \"{issue_title}\" (chunk length: {len(chunk)})")
+    # return issues
 
 
 # -----------------------
