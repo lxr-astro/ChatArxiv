@@ -661,6 +661,7 @@ if __name__ == '__main__':
             exit(1)
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.read()
+        print(f"DEBUG: Read markdown file length: {len(content)}")
         create_issues_for_long_text(title=title, body=content, labels=args.filter_keys)
 
     # 如果选择全部（默认），生成 Markdown 文件并创建 Issue
