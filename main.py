@@ -516,22 +516,111 @@ def main(args):
         save_to_file(htmls_body, date_str=title, root_path='./')
         make_github_issue(title=title, body="\n".join(htmls_body), labels=args.filter_keys)
 
+# if __name__ == '__main__':    
+#     parser = argparse.ArgumentParser()
+#     parser.add_argument("--pdf_path", type=str, default='', help="if none, the bot will download from arxiv with query")
+#     parser.add_argument("--query", type=str, default='all:remote AND all:sensing', help="the query string, ti: xx, au: xx, all: xx,") 
+#     parser.add_argument("--key_word", type=str, default='remote sensing', help="the key word of user research fields")
+#     parser.add_argument("--filter_keys", type=list, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
+#     parser.add_argument("--filter_times_span", type=int, default=1.1, help='how many days of files to be filtered.')
+#     parser.add_argument("--max_results", type=int, default=20, help="the maximum number of results")
+#     # arxiv.SortCriterion.Relevance
+#     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
+#     parser.add_argument("--file_format", type=str, default='md', help="导出的文件格式，如果存图片的话，最好是md，如果不是的话，txt的不会乱")
+#     parser.add_argument("--language", type=str, default=LANGUAGE, help="The other output lauguage is English, is en")
+    
+#     args = parser.parse_args()
+#     import time
+#     start_time = time.time()
+#     main(args=args)    
+#     print("summary time:", time.time() - start_time)
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser()
     parser.add_argument("--pdf_path", type=str, default='', help="if none, the bot will download from arxiv with query")
     parser.add_argument("--query", type=str, default='all:remote AND all:sensing', help="the query string, ti: xx, au: xx, all: xx,") 
     parser.add_argument("--key_word", type=str, default='remote sensing', help="the key word of user research fields")
-    parser.add_argument("--filter_keys", type=list, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
-    parser.add_argument("--filter_times_span", type=int, default=1.1, help='how many days of files to be filtered.')
+    parser.add_argument("--filter_keys", type=str, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
+    parser.add_argument("--filter_times_span", type=float, default=1.1, help='how many days of files to be filtered.')
     parser.add_argument("--max_results", type=int, default=20, help="the maximum number of results")
-    # arxiv.SortCriterion.Relevance
     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
     parser.add_argument("--file_format", type=str, default='md', help="导出的文件格式，如果存图片的话，最好是md，如果不是的话，txt的不会乱")
-    parser.add_argument("--language", type=str, default=LANGUAGE, help="The other output lauguage is English, is en")
+    parser.add_argument("--language", type=str, default=LANGUAGE, help="The other output language is English, is en")
+    # 新增 mode 参数：generate, create-issue, 或 all（默认）
+    parser.add_argument("--mode", type=str, default="all", choices=["generate", "create-issue", "all"], help="运行模式：generate 仅生成 Markdown, create-issue 仅创建 Issue, all 两者都执行")
     
     args = parser.parse_args()
     import time
     start_time = time.time()
-    main(args=args)    
+
+    # 如果选择仅生成 Markdown 文件
+    if args.mode == "generate":
+        if args.pdf_path:
+            # 如果提供 pdf_path，处理 pdf 文件生成摘要
+            reader = Reader(key_word=args.key_word, query=args.query, filter_keys=args.filter_keys, sort=arxiv.SortCriterion.LastUpdatedDate, args=args)
+            reader.show_info()
+            paper_list = []
+            if args.pdf_path.endswith(".pdf"):
+                paper_list.append(Paper(path=args.pdf_path))
+            else:
+                for root, dirs, files in os.walk(args.pdf_path):
+                    for filename in files:
+                        if filename.endswith(".pdf"):
+                            paper_list.append(Paper(path=os.path.join(root, filename)))
+            reader.summary_with_chat(paper_list=paper_list)
+        else:
+            filter_times_span = (now - timedelta(days=args.filter_times_span), now)
+            title = str(now)[:13].replace(' ', '-')
+            htmls_body = []
+            for filter_key in args.filter_keys.split(" "):  # 假设 filter_keys 是以空格分隔的字符串
+                query = " AND ".join(f"all:{item}" for item in filter_key.split())
+                htmls = [f'# {filter_key}']
+                reader = Reader(key_word=filter_key, query=query, filter_keys=filter_key, filter_times_span=filter_times_span, sort=arxiv.SortCriterion.LastUpdatedDate, args=args)
+                reader.show_info()
+                filter_results = reader.filter_arxiv(max_results=args.max_results)
+                paper_list = reader.download_pdf(filter_results)
+                reader.summary_with_chat(paper_list=paper_list, htmls=htmls)
+                htmls_body += htmls
+            save_to_file(htmls_body, date_str=title, root_path='./')
+    # 如果选择仅创建 Issue
+    elif args.mode == "create-issue":
+        # 假设最新的 Markdown 文件在 export/ 目录，文件名以当前日期开头
+        title = str(now)[:13].replace(' ', '-')
+        file_path = os.path.join("export", f"{title}.{args.file_format}")
+        if not os.path.exists(file_path):
+            print(f"❌ Markdown 文件 {file_path} 不存在，请先运行生成步骤.")
+            exit(1)
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+        make_github_issue(title=title, body=content, labels=args.filter_keys)
+    # 如果选择全部（默认），生成 Markdown 文件并创建 Issue
+    else:
+        if args.pdf_path:
+            reader = Reader(key_word=args.key_word, query=args.query, filter_keys=args.filter_keys, sort=arxiv.SortCriterion.LastUpdatedDate, args=args)
+            reader.show_info()
+            paper_list = []
+            if args.pdf_path.endswith(".pdf"):
+                paper_list.append(Paper(path=args.pdf_path))
+            else:
+                for root, dirs, files in os.walk(args.pdf_path):
+                    for filename in files:
+                        if filename.endswith(".pdf"):
+                            paper_list.append(Paper(path=os.path.join(root, filename)))
+            reader.summary_with_chat(paper_list=paper_list)
+        else:
+            filter_times_span = (now - timedelta(days=args.filter_times_span), now)
+            title = str(now)[:13].replace(' ', '-')
+            htmls_body = []
+            for filter_key in args.filter_keys.split(" "):
+                query = " AND ".join(f"all:{item}" for item in filter_key.split())
+                htmls = [f'# {filter_key}']
+                reader = Reader(key_word=filter_key, query=query, filter_keys=filter_key, filter_times_span=filter_times_span, sort=arxiv.SortCriterion.LastUpdatedDate, args=args)
+                reader.show_info()
+                filter_results = reader.filter_arxiv(max_results=args.max_results)
+                paper_list = reader.download_pdf(filter_results)
+                reader.summary_with_chat(paper_list=paper_list, htmls=htmls)
+                htmls_body += htmls
+            save_to_file(htmls_body, date_str=title, root_path='./')
+            make_github_issue(title=title, body="\n".join(htmls_body), labels=args.filter_keys)
+            
     print("summary time:", time.time() - start_time)
-    
+
