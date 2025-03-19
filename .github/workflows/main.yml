@@ -40,4 +40,6 @@ jobs:
         run: |
           git config --global user.email "lixinru142857@gmail.com"
           git config --global user.name "HAL149"
+          git stash --include-untracked
           git pull --rebase origin main
+          git stash pop || true
