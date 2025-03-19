@@ -35,3 +35,9 @@ jobs:
 
       - name: Run script
         run: python main.py
+
+      - name: Pull remote changes
+        run: |
+          git config --global user.email "lixinru142857@gmail.com"
+          git config --global user.name "HAL149"
+          git pull --rebase origin main
