@@ -13,3 +13,4 @@ markdown
 numpy
 pytz
 python-dotenv # for private and venv .env
+tenacity
