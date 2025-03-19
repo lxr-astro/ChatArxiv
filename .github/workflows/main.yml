@@ -29,3 +29,8 @@ jobs:
           uses: elstudio/actions-js-build/commit@v3
           with:
             commitMessage: Automated snapshot
+
+      -   name: Run script
+          env:
+            OPENAI_API_KEYS: ${{ secrets.OPENAI_API_KEYS }}
+          run: python main.py
