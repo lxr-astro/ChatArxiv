@@ -61,7 +61,7 @@ def create_issues_for_long_text(title, body, labels, max_chunk_size=30000):
     print(f"DEBUG: Splitting into {len(chunks)} chunks")
     issues = []
     for idx, chunk in enumerate(chunks, start=1):
-        issue_title = f"{title}-{idx}"
+        issue_title = f"{title}_{idx}"
         # 调用你已有的 make_github_issue 函数创建 Issue
         issue = make_github_issue(title=issue_title, body=chunk, labels=labels)
         issues.append(issue)
