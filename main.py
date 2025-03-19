@@ -52,7 +52,7 @@ def split_text_into_chunks(text, max_chunk_size=10000):
         start = end
     return chunks
 
-def create_issues_for_long_text(title, body, labels, max_chunk_size=30000):
+def create_issues_for_long_text(title, body, labels, max_chunk_size=10000):
     """
     根据 body 内容拆分为多个块，并依次创建 Issue，标题后添加 -1、-2 ...
     """
