@@ -71,7 +71,7 @@ def make_github_issue(title, body=None, assignee=USERNAME, closed=False, labels=
         labels = []
     
     # 使用标准 Issue API endpoint
-    url = f'https://api.github.com/repos/{REPO_OWNER}/{REPO_NAME}/issues'
+    url = f'https://api.github.com/repos/lxr-astro/ChatArxiv/issues'
 
     headers = {
         "Authorization": f"token {TOKEN}",
