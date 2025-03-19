@@ -17,9 +17,13 @@ from dotenv import load_dotenv
 
 # 加载 .env 文件
 load_dotenv()
+
+# 从环境变量获取 API Key
 OPENAI_API_KEYS = os.getenv("OPENAI_API_KEYS")
+
+# 确保 API Key 被正确加载
 if not OPENAI_API_KEYS:
-    print("❌ 错误：未正确加载 API Key！请检查 .env 文件")
+    print("❌ 错误：未正确加载 API Key！请检查 GitHub Secrets 或 .env 文件")
     exit(1)
 
 print(f"✅ API Key 加载成功: {OPENAI_API_KEYS[:5]}********")
