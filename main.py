@@ -140,19 +140,27 @@ class Reader:
                               sort_order=arxiv.SortOrder.Descending,
                               )       
         return search
-     
+# --------------------------   
+    import tenacity
+
+    @tenacity.retry(
+        wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
+        stop=tenacity.stop_after_attempt(5),
+        reraise=True
+    ) 
     def filter_arxiv(self, max_results=30):
         search = self.get_arxiv(max_results=max_results)
         print("all search:")
-        for index, result in enumerate(search.results()):
+        # 使用 list() 获取所有结果，以便重试时一次性获取
+        results = list(search.results())
+        for index, result in enumerate(results):
             print(index, result.title, result.updated)
-            
+                
         filter_results = []   
         filter_keys = self.filter_keys
-        
         print("filter_keys:", self.filter_keys)
         # 确保每个关键词都能在摘要中找到，才算是目标论文
-        for index, result in enumerate(search.results()):
+        for index, result in enumerate(results):
             # 过滤不在时间范围内的论文
             if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
                 continue 
@@ -163,13 +171,40 @@ class Reader:
                     meet_num += 1
             if meet_num == len(filter_keys.split(" ")):
                 filter_results.append(result)
-                # break
-        print("筛选后剩下的论文数量：")
-        print("filter_results:", len(filter_results))
-        print("filter_papers:")
+        print("筛选后剩下的论文数量：", len(filter_results))
         for index, result in enumerate(filter_results):
             print(index, result.title, result.updated)
         return filter_results
+        
+    # def filter_arxiv(self, max_results=30):
+    #     search = self.get_arxiv(max_results=max_results)
+    #     print("all search:")
+    #     for index, result in enumerate(search.results()):
+    #         print(index, result.title, result.updated)
+            
+    #     filter_results = []   
+    #     filter_keys = self.filter_keys
+        
+    #     print("filter_keys:", self.filter_keys)
+    #     # 确保每个关键词都能在摘要中找到，才算是目标论文
+    #     for index, result in enumerate(search.results()):
+    #         # 过滤不在时间范围内的论文
+    #         if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
+    #             continue 
+    #         abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')
+    #         meet_num = 0
+    #         for f_key in filter_keys.split(" "):
+    #             if f_key.lower() in abs_text.lower():
+    #                 meet_num += 1
+    #         if meet_num == len(filter_keys.split(" ")):
+    #             filter_results.append(result)
+    #             # break
+    #     print("筛选后剩下的论文数量：")
+    #     print("filter_results:", len(filter_results))
+    #     print("filter_papers:")
+    #     for index, result in enumerate(filter_results):
+    #         print(index, result.title, result.updated)
+    #     return filter_results
     
     def validateTitle(self, title):
         # 将论文的乱七八糟的路径格式修正
