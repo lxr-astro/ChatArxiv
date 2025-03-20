@@ -477,35 +477,82 @@ class Reader:
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_summary(self, text, summary_prompt_token = 1100):
+    # def chat_summary(self, text, summary_prompt_token = 1100):
+    #     openai.api_key = self.chat_api_list[self.cur_api]
+    #     self.cur_api += 1
+    #     self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+    #     text_token = len(self.encoding.encode(text))
+    #     clip_text_index = int(len(text)*(self.max_token_num-summary_prompt_token)/text_token)
+    #     clip_text = text[:clip_text_index]
+    #     messages=[
+    #             {"role": "system", "content": "You are a researcher in the field of ["+self.key_word+"] who is good at summarizing papers using concise statements"},
+    #             {"role": "assistant", "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: "+clip_text},
+    #             {"role": "user", "content": """                 
+    #              summarize according to the following five points.Be sure to use {} answers (proper nouns need to be marked in English)
+    #                 - (1):What is the research background of this article?
+    #                 - (2):What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated? 
+    #                 - (3):What is the contribution of the paper?
+    #                 - (4):What is the research methodology proposed in this paper?
+    #                 - (5):On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
+    #              Follow the format of the output that follows:                    
+    #              **Summary**: \n\n
+    #                 - (1):xxx;\n 
+    #                 - (2):xxx;\n 
+    #                 - (3):xxx;\n 
+    #                 - (4):xxx;\n  
+    #                 - (5):xxx.\n\n     
+                 
+    #              Be sure to use {} answers (proper nouns need to be marked in English), statements as concise and academic as possible, do not have too much repetitive information, numerical values using the original numbers, be sure to strictly follow the format, the corresponding content output to xxx, in accordance with \n line feed.                 
+    #              """.format(self.language, self.language, self.language)},
+    #         ]
+                
+    #     response = openai.ChatCompletion.create(
+    #         model="gpt-4o-mini",
+    #         messages=messages,
+    #     )
+    #     result = ''
+    #     for choice in response.choices:
+    #         result += choice.message.content
+    #     print("summary_result:\n", result)
+    #     print("prompt_token_used:", response.usage.prompt_tokens,
+    #           "completion_token_used:", response.usage.completion_tokens,
+    #           "total_token_used:", response.usage.total_tokens)
+    #     print("response_time:", response.response_ms/1000.0, 's')                    
+    #     return result      
+    def chat_summary(self, text, summary_prompt_token=1100):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
-        self.cur_api = 0 if self.cur_api >= len(self.chat_api_list)-1 else self.cur_api
+        self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
         text_token = len(self.encoding.encode(text))
-        clip_text_index = int(len(text)*(self.max_token_num-summary_prompt_token)/text_token)
+        clip_text_index = int(len(text) * (self.max_token_num - summary_prompt_token) / text_token)
         clip_text = text[:clip_text_index]
-        messages=[
-                {"role": "system", "content": "You are a researcher in the field of ["+self.key_word+"] who is good at summarizing papers using concise statements"},
-                {"role": "assistant", "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: "+clip_text},
-                {"role": "user", "content": """                 
-                 summarize according to the following five points.Be sure to use {} answers (proper nouns need to be marked in English)
-                    - (1):What is the research background of this article?
-                    - (2):What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated? 
-                    - (3):What is the contribution of the paper?
-                    - (4):What is the research methodology proposed in this paper?
-                    - (5):On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
-                 Follow the format of the output that follows:                    
-                 **Summary**: \n\n
-                    - (1):xxx;\n 
-                    - (2):xxx;\n 
-                    - (3):xxx;\n 
-                    - (4):xxx;\n  
-                    - (5):xxx.\n\n     
-                 
-                 Be sure to use {} answers (proper nouns need to be marked in English), statements as concise and academic as possible, do not have too much repetitive information, numerical values using the original numbers, be sure to strictly follow the format, the corresponding content output to xxx, in accordance with \n line feed.                 
-                 """.format(self.language, self.language, self.language)},
-            ]
-                
+        messages = [
+            {"role": "system", "content": "You are a researcher in the field of [" + self.key_word + "] who is good at summarizing papers using concise statements"},
+            {"role": "assistant", "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: " + clip_text},
+            {"role": "user", "content": """
+            Before providing the summary, please first translate the abstract (if available) into Chinese.
+            
+            Then, summarize the paper according to the following five points. Be sure to use {0} answers (proper nouns need to be marked in English):
+              - (1): What is the research background of this article?
+              - (2): What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated?
+              - (3): What is the contribution of the paper?
+              - (4): What is the research methodology proposed in this paper?
+              - (5): On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
+            
+            Follow the format of the output below:
+            **Translated Abstract**: <Your translated abstract here>
+            **Summary**:
+            
+              - (1): xxx;
+              - (2): xxx;
+              - (3): xxx;
+              - (4): xxx;
+              - (5): xxx.
+            
+            Be sure to use {1} answers (proper nouns need to be marked in English) and keep statements concise and academic. Do not repeat content from the previous summary and strictly follow the output format.
+            """.format(self.language, self.language)}
+        ]
+        
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=messages,
@@ -517,8 +564,9 @@ class Reader:
         print("prompt_token_used:", response.usage.prompt_tokens,
               "completion_token_used:", response.usage.completion_tokens,
               "total_token_used:", response.usage.total_tokens)
-        print("response_time:", response.response_ms/1000.0, 's')                    
-        return result      
+        print("response_time:", response.response_ms/1000.0, 's')
+        return result
+
 
     # 定义一个方法，打印出读者信息
     def show_info(self):        
