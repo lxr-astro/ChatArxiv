@@ -30,7 +30,7 @@ print(f"✅ API Key 加载成功: {OPENAI_API_KEYS[:5]}********")
 
 
 
-def split_text_into_chunks(text, max_chunk_size=30000):
+def split_text_into_chunks(text, max_chunk_size=100000):
     """
     将文本拆分成多个块，每个块长度不超过 max_chunk_size（字符数）
     优先在换行符处拆分，保证内容格式较好。
@@ -53,7 +53,7 @@ def split_text_into_chunks(text, max_chunk_size=30000):
     return chunks
     # return [text[i:i+max_chunk_size] for i in range(0, len(text), max_chunk_size)]
 
-def create_issues_for_long_text(title, body, labels, max_chunk_size=30000):
+def create_issues_for_long_text(title, body, labels, max_chunk_size=100000):
     """
     根据 body 内容拆分为多个块，并依次创建 Issue，标题后添加 -1、-2 ...
     """
@@ -417,7 +417,7 @@ class Reader:
                  """.format(self.language, self.language)},
             ]
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+             jmj="gpt-4o-mini",
             # prompt需要用英语替换，少占用token。
             messages=messages,
         )
@@ -507,7 +507,7 @@ class Reader:
             ]
                 
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4o-mini",
             messages=messages,
         )
         result = ''
