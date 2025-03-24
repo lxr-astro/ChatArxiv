@@ -159,7 +159,7 @@ class Reader:
         filter_results = []   
         filter_keys = self.filter_keys
         print("filter_keys:", self.filter_keys)
-        # 确保每个关键词都能在摘要中找到，才算是目标论文
+        
         for index, result in enumerate(results):
             # 过滤不在时间范围内的论文
             if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
@@ -169,7 +169,9 @@ class Reader:
             for f_key in filter_keys.split(" "):
                 if f_key.lower() in abs_text.lower():
                     meet_num += 1
-            if meet_num == len(filter_keys.split(" ")):
+            # 确保每个关键词都能在摘要中找到，才算是目标论文
+            # if meet_num == len(filter_keys.split(" ")):
+            if meet_num > 0 :
                 filter_results.append(result)
         print("筛选后剩下的论文数量：", len(filter_results))
         for index, result in enumerate(filter_results):
