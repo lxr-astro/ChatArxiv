@@ -148,6 +148,8 @@ class Reader:
         stop=tenacity.stop_after_attempt(5),
         reraise=True
     ) 
+
+
     def filter_arxiv(self, max_results=30):
         search = self.get_arxiv(max_results=max_results)
         print("all search:")
@@ -156,22 +158,32 @@ class Reader:
             print(index, result.title, result.updated)
     
         filter_results = []
-        filter_keys = self.filter_keys  # 关键词列表
+        filter_keys = self.filter_keys  # 关键词列表，确保它是列表
         print("filter_keys:", filter_keys)
     
         # 只要摘要中出现任意一个关键词，就通过筛选
         for index, result in enumerate(results):
-            # 过滤不在时间范围内的论文
+            # 过滤不在时间范围内的论文（DEBUG: 打印时间范围）
+            print(f"论文时间: {result.updated}, 允许时间范围: {self.filter_times_span}")
             if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
                 continue 
     
             abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')  # 处理换行符
-            title_text = result.title.lower()  # 论文标题
-            abs_text = abs_text.lower()  # 论文摘要
+            title_text = result.title  # 论文标题
+            abs_text = abs_text.lower()  # 摘要小写
+            title_text = title_text.lower()  # 标题小写
+    
+            # DEBUG: 打印摘要和标题，检查是否包含关键词
+            print(f"论文标题: {title_text}")
+            print(f"论文摘要: {abs_text[:200]}...")  # 只打印前 200 字符，避免过长
     
             # 只要关键词出现在摘要或标题中，就加入筛选结果
-            if any(f_key.lower() in abs_text or f_key.lower() in title_text for f_key in filter_keys):
-                filter_results.append(result)
+            for f_key in filter_keys:
+                f_key = f_key.lower()  # 确保关键词小写匹配
+                if f_key in abs_text or f_key in title_text:
+                    print(f"✅ 关键词 '{f_key}' 命中: {title_text}")  # DEBUG: 记录命中
+                    filter_results.append(result)
+                    break  # 命中一个关键词即可，不必继续检查
     
         print("筛选后剩下的论文数量：", len(filter_results))
         for index, result in enumerate(filter_results):
@@ -179,22 +191,8 @@ class Reader:
     
         return filter_results
 
-        # 确保每个关键词都能在摘要中找到，才算是目标论文
-        # for index, result in enumerate(results):
-        #     # 过滤不在时间范围内的论文
-        #     if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
-        #         continue 
-        #     abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')
-        #     meet_num = 0
-        #     for f_key in filter_keys.split(" "):
-        #         if f_key.lower() in abs_text.lower():
-        #             meet_num += 1   
-        #     if meet_num == len(filter_keys.split(" ")):
-        #         filter_results.append(result)
-        # print("筛选后剩下的论文数量：", len(filter_results))
-        # for index, result in enumerate(filter_results):
-        #     print(index, result.title, result.updated)
-        # return filter_results
+
+
         
     # def filter_arxiv(self, max_results=30):
     #     search = self.get_arxiv(max_results=max_results)
