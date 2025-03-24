@@ -159,24 +159,40 @@ class Reader:
         filter_results = []   
         filter_keys = self.filter_keys
         print("filter_keys:", self.filter_keys)
-        
+
+        # 只要摘要中出现任意一个关键词，就通过筛选
         for index, result in enumerate(results):
             # 过滤不在时间范围内的论文
             if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
                 continue 
             abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')
-            meet_num = 0
-            for f_key in filter_keys.split(" "):
-                if f_key.lower() in abs_text.lower():
-                    meet_num += 1
-            # 确保每个关键词都能在摘要中找到，才算是目标论文
-            # if meet_num == len(filter_keys.split(" ")):
-            if meet_num > 0 :
+            
+            # 如果任意一个关键词出现在摘要中，就加入筛选结果
+            if any(f_key.lower() in abs_text.lower() for f_key in filter_keys.split(" ")):
                 filter_results.append(result)
+        
         print("筛选后剩下的论文数量：", len(filter_results))
         for index, result in enumerate(filter_results):
             print(index, result.title, result.updated)
+        
         return filter_results
+
+        # 确保每个关键词都能在摘要中找到，才算是目标论文
+        # for index, result in enumerate(results):
+        #     # 过滤不在时间范围内的论文
+        #     if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
+        #         continue 
+        #     abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')
+        #     meet_num = 0
+        #     for f_key in filter_keys.split(" "):
+        #         if f_key.lower() in abs_text.lower():
+        #             meet_num += 1   
+        #     if meet_num == len(filter_keys.split(" ")):
+        #         filter_results.append(result)
+        # print("筛选后剩下的论文数量：", len(filter_results))
+        # for index, result in enumerate(filter_results):
+        #     print(index, result.title, result.updated)
+        # return filter_results
         
     # def filter_arxiv(self, max_results=30):
     #     search = self.get_arxiv(max_results=max_results)
