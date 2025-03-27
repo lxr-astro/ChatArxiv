@@ -98,7 +98,7 @@ from datetime import datetime, timedelta
 import pytz
 
 now = datetime.now(pytz.utc)
-yesterday = now - timedelta(days=2)
+yesterday = now - timedelta(days=1.5)
 
 # 定义Reader类
 class Reader:
