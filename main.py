@@ -165,8 +165,8 @@ class Reader:
         for index, result in enumerate(results):
             # 过滤不在时间范围内的论文（DEBUG: 打印时间范围）
             print(f"论文时间: {result.updated}, 允许时间范围: {self.filter_times_span}")
-            if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
-                continue 
+            # if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
+            #     continue
     
             abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')  # 处理换行符
             title_text = result.title  # 论文标题
