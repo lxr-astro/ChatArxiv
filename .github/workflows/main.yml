@@ -40,11 +40,6 @@ jobs:
       - name: Generate markdown file
         run: python main.py --mode generate
 
-      # 创建 Issue（基于已提交的 Markdown 文件）
-      - name: Create Issue from markdown file
-        run: python main.py --mode create-issue
-
-
       - name: Commit generated markdown file
         run: |
           git config --global user.email "lixinru142857@gmail.com"
@@ -53,5 +48,7 @@ jobs:
           git commit -m "Automated snapshot of markdown file" || echo "No changes to commit"
           git push origin main
 
-
+      # 创建 Issue（基于已提交的 Markdown 文件）
+      - name: Create Issue from markdown file
+        run: python main.py --mode create-issue
 
