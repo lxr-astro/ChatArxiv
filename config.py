@@ -20,7 +20,7 @@ REPO_NAME = 'ChatArxiv'
 NEW_SUB_URL = 'https://arxiv.org/list/astro-ph.GA/recent'
 
 # Keywords to search
-KEYWORD_LIST = ["blackhole","galaxy","galaxies","machine learning","AGN","ALMA"]
+KEYWORD_LIST = ["blackhole","M87","galaxy","galaxies","machine learning","AGN","ALMA"]
 # KEYWORD_LIST = ["blackhole","galaxy"]
 
 # API???
