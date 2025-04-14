@@ -98,7 +98,7 @@ from datetime import datetime, timedelta
 import pytz
 
 now = datetime.now(pytz.utc)
-yesterday = now - timedelta(days=2)
+yesterday = now - timedelta(days=30)
 
 # 定义Reader类
 class Reader:
@@ -135,7 +135,7 @@ class Reader:
         print(f"时间范围: {self.filter_times_span[0]} ~ {self.filter_times_span[1]}")
 
                 
-    def get_arxiv(self, max_results=30):
+    def get_arxiv(self, max_results=60):
         # https://info.arxiv.org/help/api/user-manual.html#query_details
         search = arxiv.Search(query=self.query,
                               max_results=max_results,                              
@@ -153,7 +153,7 @@ class Reader:
     ) 
 
 
-    def filter_arxiv(self, max_results=30):
+    def filter_arxiv(self, max_results=60):
         search = self.get_arxiv(max_results=max_results)
         print("all search:")
         results = list(search.results())  # 获取所有论文
