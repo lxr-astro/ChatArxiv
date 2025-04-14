@@ -554,9 +554,7 @@ class Reader:
         clip_text = text[:clip_text_index]
         messages = [
                 {"role": "user", "content": """
-    
-                    Translate the title.
-    
+                
                     Translate the abstract.
     
                     summarize the paper according to the following six points. Be sure to use {0} answers (proper nouns need to be marked in English):
