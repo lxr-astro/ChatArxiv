@@ -96,6 +96,7 @@ from config import OPENAI_API_KEYS, KEYWORD_LIST, LANGUAGE
 
 from datetime import datetime, timedelta
 import pytz
+now = datetime.now(pytz.utc)
 
 class Reader:
     def __init__(self, filter_keys, filter_times_span=None, key_word=None,
