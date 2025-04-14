@@ -553,11 +553,9 @@ class Reader:
         clip_text_index = int(len(text) * (self.max_token_num - summary_prompt_token) / text_token)
         clip_text = text[:clip_text_index]
         messages = [
-            {"role": "system",
-             "content": "You are a researcher in the field of [" + self.key_word + "] who is good at summarizing papers using concise statements"},
-            {"role": "assistant",
-             "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: " + clip_text},
-            {"role": "user", "content": """
+                {"role": "system", "content": "You are a researcher in the field of [" + self.key_word + "] who is good at summarizing papers using concise statements"},
+                {"role": "assistant", "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: " + clip_text},
+                {"role": "user", "content": """
             
                         Translate the abstract.
 
