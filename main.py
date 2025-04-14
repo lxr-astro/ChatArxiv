@@ -558,9 +558,7 @@ class Reader:
             {"role": "assistant",
              "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: " + clip_text},
             {"role": "user", "content": """
-
-                        Translate the title.
-
+            
                         Translate the abstract.
 
                         summarize the paper according to the following five points. Be sure to use {0} answers (proper nouns need to be marked in English):
@@ -569,7 +567,6 @@ class Reader:
                           - (3): What is the contribution of the paper?
                           - (4): What is the research methodology proposed in this paper?
                           - (5): On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
-
 
 
                         Follow the format of the output below:
