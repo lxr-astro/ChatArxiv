@@ -553,32 +553,38 @@ class Reader:
         clip_text_index = int(len(text) * (self.max_token_num - summary_prompt_token) / text_token)
         clip_text = text[:clip_text_index]
         messages = [
-                {"role": "user", "content": """
-                
-                    Translate the abstract.
-    
-                    summarize the paper according to the following six points. Be sure to use {0} answers (proper nouns need to be marked in English):
-                      - (1): What is the research background of this article?
-                      - (2): What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated?
-                      - (3): What is the contribution of the paper?
-                      - (4): What is the research methodology proposed in this paper?
-                      - (5): On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
-                      - (6): What are the limitations of existing studies mentioned in the paper? What future directions or open problems are suggested? What is the current progress of this line of research according to the paper?
-    
-                    Follow the format of the output below:
-    
-                    **Translated Abstract**: \n\n
-                    <Your translated abstract here> \n\n
-                    **Summary**:\n\n
-                      - (1): xxx;\n
-                      - (2): xxx;\n
-                      - (3): xxx;\n
-                      - (4): xxx;\n
-                      - (5): xxx;\n
-                      - (6): xxx.\n\n
-    
-                    Be sure to use {1} answers (proper nouns need to be marked in English) and keep statements concise and academic. Do not repeat content from the previous summary and strictly follow the output format.
-                    """.format(self.language, self.language)}
+            {"role": "system",
+             "content": "You are a researcher in the field of [" + self.key_word + "] who is good at summarizing papers using concise statements"},
+            {"role": "assistant",
+             "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: " + clip_text},
+            {"role": "user", "content": """
+
+                        Translate the title.
+
+                        Translate the abstract.
+
+                        summarize the paper according to the following five points. Be sure to use {0} answers (proper nouns need to be marked in English):
+                          - (1): What is the research background of this article?
+                          - (2): What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated?
+                          - (3): What is the contribution of the paper?
+                          - (4): What is the research methodology proposed in this paper?
+                          - (5): On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
+
+
+
+                        Follow the format of the output below:
+
+                        **Translated Abstract**: \n\n
+                        <Your translated abstract here> \n\n
+                        **Summary**:\n\n
+                          - (1): xxx;\n
+                          - (2): xxx;\n
+                          - (3): xxx;\n
+                          - (4): xxx;\n
+                          - (5): xxx.\n\n
+
+                        Be sure to use {1} answers (proper nouns need to be marked in English) and keep statements concise and academic. Do not repeat content from the previous summary and strictly follow the output format.
+                        """.format(self.language, self.language)}
         ]
 
         response = openai.ChatCompletion.create(
