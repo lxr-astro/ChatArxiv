@@ -120,7 +120,7 @@ class Reader:
         # 处理 filter_times_span 默认值（每次都重新计算 now 和 yesterday）
         if filter_times_span is None:
             now = datetime.now(pytz.utc)
-            yesterday = now - timedelta(days=30)
+            yesterday = now - timedelta(days=90)
             self.filter_times_span = (yesterday, now)
         else:
             self.filter_times_span = filter_times_span
@@ -139,7 +139,7 @@ class Reader:
 
 
                 
-    def get_arxiv(self, max_results=60):
+    def get_arxiv(self, max_results=999):
         # https://info.arxiv.org/help/api/user-manual.html#query_details
         search = arxiv.Search(query=self.query,
                               max_results=max_results,                              
@@ -157,7 +157,7 @@ class Reader:
     ) 
 
 
-    def filter_arxiv(self, max_results=60):
+    def filter_arxiv(self, max_results=999):
         search = self.get_arxiv(max_results=max_results)
         print("all search:")
         results = list(search.results())  # 获取所有论文
@@ -553,34 +553,36 @@ class Reader:
         clip_text_index = int(len(text) * (self.max_token_num - summary_prompt_token) / text_token)
         clip_text = text[:clip_text_index]
         messages = [
-                {"role": "system", "content": "You are a researcher in the field of [" + self.key_word + "] who is good at summarizing papers using concise statements"},
-                {"role": "assistant", "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: " + clip_text},
                 {"role": "user", "content": """
-                
-                Translate the abstract.
-                
-                summarize the paper according to the following five points. Be sure to use {0} answers (proper nouns need to be marked in English):
-                  - (1): What is the research background of this article?
-                  - (2): What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated?
-                  - (3): What is the contribution of the paper?
-                  - (4): What is the research methodology proposed in this paper?
-                  - (5): On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
-                
-                Follow the format of the output below:
-                
-                **Translated Abstract**: \n\n
-                <Your translated abstract here> \n\n
-                **Summary**:\n\n
-                  - (1): xxx;\n
-                  - (2): xxx;\n
-                  - (3): xxx;\n
-                  - (4): xxx;\n
-                  - (5): xxx.\n\n
-                
-                Be sure to use {1} answers (proper nouns need to be marked in English) and keep statements concise and academic. Do not repeat content from the previous summary and strictly follow the output format.
-                """.format(self.language, self.language)}
+    
+                    Translate the title.
+    
+                    Translate the abstract.
+    
+                    summarize the paper according to the following six points. Be sure to use {0} answers (proper nouns need to be marked in English):
+                      - (1): What is the research background of this article?
+                      - (2): What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated?
+                      - (3): What is the contribution of the paper?
+                      - (4): What is the research methodology proposed in this paper?
+                      - (5): On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
+                      - (6): What are the limitations of existing studies mentioned in the paper? What future directions or open problems are suggested? What is the current progress of this line of research according to the paper?
+    
+                    Follow the format of the output below:
+    
+                    **Translated Abstract**: \n\n
+                    <Your translated abstract here> \n\n
+                    **Summary**:\n\n
+                      - (1): xxx;\n
+                      - (2): xxx;\n
+                      - (3): xxx;\n
+                      - (4): xxx;\n
+                      - (5): xxx;\n
+                      - (6): xxx.\n\n
+    
+                    Be sure to use {1} answers (proper nouns need to be marked in English) and keep statements concise and academic. Do not repeat content from the previous summary and strictly follow the output format.
+                    """.format(self.language, self.language)}
         ]
-        
+
         response = openai.ChatCompletion.create(
             model="gpt-4o-mini",
             messages=messages,
@@ -721,8 +723,8 @@ if __name__ == '__main__':
     parser.add_argument("--query", type=str, default='all:remote AND all:sensing', help="the query string, ti: xx, au: xx, all: xx,") 
     parser.add_argument("--key_word", type=str, default='remote sensing', help="the key word of user research fields")
     parser.add_argument("--filter_keys", type=str, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
-    parser.add_argument("--filter_times_span", type=float, default=30, help='how many days of files to be filtered.')
-    parser.add_argument("--max_results", type=int, default=60, help="the maximum number of results")
+    parser.add_argument("--filter_times_span", type=float, default=90, help='how many days of files to be filtered.')
+    parser.add_argument("--max_results", type=int, default=999, help="the maximum number of results")
     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
     parser.add_argument("--file_format", type=str, default='md', help="导出的文件格式，如果存图片的话，最好是md，如果不是的话，txt的不会乱")
     parser.add_argument("--language", type=str, default=LANGUAGE, help="The other output language is English, is en")
