@@ -97,42 +97,45 @@ from config import OPENAI_API_KEYS, KEYWORD_LIST, LANGUAGE
 from datetime import datetime, timedelta
 import pytz
 
-now = datetime.now(pytz.utc)
-yesterday = now - timedelta(days=30)
-
-# 定义Reader类
 class Reader:
-    # 初始化方法，设置属性
-    def __init__(self,  filter_keys, filter_times_span=(yesterday, now), key_word=None,      
-                 query=None,  root_path='./',
-                 sort=arxiv.SortCriterion.LastUpdatedDate, 
-                 user_name='defualt', args=None):
-        self.user_name = user_name # 读者姓名
-        self.key_word = key_word # 读者感兴趣的关键词
-        self.query = query # 读者输入的搜索查询
-        self.sort = sort # 读者选择的排序方式
+    def __init__(self, filter_keys, filter_times_span=None, key_word=None,
+                 query=None, root_path='./',
+                 sort=arxiv.SortCriterion.LastUpdatedDate,
+                 user_name='default', args=None):
+
+        self.user_name = user_name
+        self.key_word = key_word
+        self.query = query
+        self.sort = sort
+
+        # 设置语言
         if args.language == 'en':
             self.language = 'English'
         elif args.language == 'zh':
             self.language = 'Chinese'
         else:
-            self.language = 'Chinese'        
-        self.filter_keys = filter_keys # 用于在摘要中筛选的关键词
-        self.filter_times_span = filter_times_span  # 用于选定某区间更新的arxiv paper
+            self.language = 'Chinese'
 
+        # 处理 filter_times_span 默认值（每次都重新计算 now 和 yesterday）
+        if filter_times_span is None:
+            now = datetime.now(pytz.utc)
+            yesterday = now - timedelta(days=30)
+            self.filter_times_span = (yesterday, now)
+        else:
+            self.filter_times_span = filter_times_span
+
+        self.filter_keys = filter_keys
         self.root_path = root_path
 
-        # 获取某个键对应的值        changed
         self.chat_api_list = [OPENAI_API_KEYS] if isinstance(OPENAI_API_KEYS, str) else []
-
         self.cur_api = 0
-        self.file_format = args.file_format        
+        self.file_format = args.file_format
         self.max_token_num = 4096
         self.encoding = tiktoken.get_encoding("gpt2")
 
-        print(f"当前时间: {now}")
-        print(f"yesterday时间: {yesterday}")
-        print(f"时间范围: {self.filter_times_span[0]} ~ {self.filter_times_span[1]}")
+        print(f"当前时间范围: {self.filter_times_span[0]} ~ {self.filter_times_span[1]}")
+
+
 
                 
     def get_arxiv(self, max_results=60):
