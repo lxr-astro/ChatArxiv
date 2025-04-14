@@ -120,7 +120,7 @@ class Reader:
         # 处理 filter_times_span 默认值（每次都重新计算 now 和 yesterday）
         if filter_times_span is None:
             now = datetime.now(pytz.utc)
-            yesterday = now - timedelta(days=90)
+            yesterday = now - timedelta(days=9999)
             self.filter_times_span = (yesterday, now)
         else:
             self.filter_times_span = filter_times_span
@@ -722,7 +722,7 @@ if __name__ == '__main__':
     parser.add_argument("--query", type=str, default='all:remote AND all:sensing', help="the query string, ti: xx, au: xx, all: xx,") 
     parser.add_argument("--key_word", type=str, default='remote sensing', help="the key word of user research fields")
     parser.add_argument("--filter_keys", type=str, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
-    parser.add_argument("--filter_times_span", type=float, default=90, help='how many days of files to be filtered.')
+    parser.add_argument("--filter_times_span", type=float, default=9999, help='how many days of files to be filtered.')
     parser.add_argument("--max_results", type=int, default=999, help="the maximum number of results")
     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
     parser.add_argument("--file_format", type=str, default='md', help="导出的文件格式，如果存图片的话，最好是md，如果不是的话，txt的不会乱")
