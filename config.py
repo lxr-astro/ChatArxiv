@@ -21,8 +21,8 @@ NEW_SUB_URL = 'https://arxiv.org/list/astro-ph.GA/recent'
 
 # Keywords to search
 # KEYWORD_LIST = ["blackhole","M87","galaxy","galaxies","machine learning","AGN","ALMA"]
-# KEYWORD_LIST = ["M87 review", "M87 overview", "M87 survey", "M87 literature review", "M87 jet review", "M87 AGN review"]
-KEYWORD_LIST = ["Brightest Cluster Galaxies", "Brightest Cluster Galaxy"]
+KEYWORD_LIST = ["M87 review", "M87 overview", "M87 survey", "M87 literature review", "M87 jet review", "M87 AGN review"]
+# KEYWORD_LIST = ["Brightest Cluster Galaxies", "Brightest Cluster Galaxy"]
 
 # API???
 OPENAI_API_KEYS = os.getenv("OPENAI_API_KEYS")
