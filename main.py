@@ -120,7 +120,7 @@ class Reader:
         # 处理 filter_times_span 默认值（每次都重新计算 now 和 yesterday）
         if filter_times_span is None:
             now = datetime.now(pytz.utc)
-            yesterday = now - timedelta(days=400)
+            yesterday = now - timedelta(days=4000)
             self.filter_times_span = (yesterday, now)
         else:
             self.filter_times_span = filter_times_span
@@ -146,7 +146,7 @@ class Reader:
 
 
                 
-    def get_arxiv(self, max_results=30):
+    def get_arxiv(self, max_results=99):
         # https://info.arxiv.org/help/api/user-manual.html#query_details
         search = arxiv.Search(query=self.query,
                               max_results=max_results,                              
@@ -162,7 +162,7 @@ class Reader:
         stop=tenacity.stop_after_attempt(5),
         reraise=True
     )
-    def filter_arxiv(self, max_results=30):
+    def filter_arxiv(self, max_results=99):
         search = self.get_arxiv(max_results=max_results)
         print("all search:")
         results = list(search.results())  # 获取所有论文
@@ -737,8 +737,8 @@ if __name__ == '__main__':
         default=KEYWORD_LIST,
         help="关键词列表"
     )
-    parser.add_argument("--filter_times_span", type=float, default=400, help='how many days of files to be filtered.')
-    parser.add_argument("--max_results", type=int, default=30, help="the maximum number of results")
+    parser.add_argument("--filter_times_span", type=float, default=4000, help='how many days of files to be filtered.')
+    parser.add_argument("--max_results", type=int, default=99, help="the maximum number of results")
     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
     parser.add_argument("--file_format", type=str, default='md', help="导出的文件格式，如果存图片的话，最好是md，如果不是的话，txt的不会乱")
     parser.add_argument("--language", type=str, default=LANGUAGE, help="The other output language is English, is en")
