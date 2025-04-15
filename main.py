@@ -120,7 +120,7 @@ class Reader:
         # 处理 filter_times_span 默认值（每次都重新计算 now 和 yesterday）
         if filter_times_span is None:
             now = datetime.now(pytz.utc)
-            yesterday = now - timedelta(days=9999)
+            yesterday = now - timedelta(days=4000)
             self.filter_times_span = (yesterday, now)
         else:
             self.filter_times_span = filter_times_span
@@ -154,53 +154,42 @@ class Reader:
         wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
         stop=tenacity.stop_after_attempt(5),
         reraise=True
-    ) 
-
-
-    def filter_arxiv(self, max_results=999):
+    )
+    def filter_arxiv(self, max_results=30):
         search = self.get_arxiv(max_results=max_results)
         print("all search:")
         results = list(search.results())  # 获取所有论文
         for index, result in enumerate(results):
             print(index, result.title, result.updated)
-    
+
         filter_results = []
-        filter_keys = self.filter_keys  # 关键词列表，确保它是列表
+        filter_keys = self.filter_keys  # 关键词列表
         print("filter_keys:", filter_keys)
-    
-        # 只要摘要中出现任意一个关键词，就通过筛选
+
+        # 打印每篇论文的更新时间，确保时间范围正常
         for index, result in enumerate(results):
-            # 过滤不在时间范围内的论文（DEBUG: 打印时间范围）
             print(f"论文时间: {result.updated}, 允许时间范围: {self.filter_times_span}")
             if result.updated < self.filter_times_span[0] or result.updated > self.filter_times_span[1]:
                 continue
-    
-            abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')  # 处理换行符
-            title_text = result.title  # 论文标题
-            abs_text = abs_text.lower()  # 摘要小写
-            title_text = title_text.lower()  # 标题小写
-    
-            # DEBUG: 打印摘要和标题，检查是否包含关键词
-            print(f"论文标题: {title_text}")
-            print(f"论文摘要: {abs_text[:200]}...")  # 只打印前 200 字符，避免过长
-    
-            # 只要关键词出现在摘要或标题中，就加入筛选结果
+
+            abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')
+            title_text = result.title
+            abs_text = abs_text.lower()
+            title_text = title_text.lower()
+
+            # 只要任意一个关键词命中即可
             for f_key in filter_keys:
-                f_key = f_key.lower()  # 确保关键词小写匹配
-                if f_key in abs_text or f_key in title_text:
-                    print(f"✅ 关键词 '{f_key}' 命中: {title_text}")  # DEBUG: 记录命中
+                if f_key.lower() in abs_text or f_key.lower() in title_text:
+                    print(f"✅ 关键词 '{f_key}' 命中: {title_text}")
                     filter_results.append(result)
-                    break  # 命中一个关键词即可，不必继续检查
-    
+                    break
+
         print("筛选后剩下的论文数量：", len(filter_results))
         for index, result in enumerate(filter_results):
             print(index, result.title, result.updated)
-    
+
         return filter_results
 
-
-
-        
     # def filter_arxiv(self, max_results=30):
     #     search = self.get_arxiv(max_results=max_results)
     #     print("all search:")
@@ -722,7 +711,7 @@ if __name__ == '__main__':
     parser.add_argument("--query", type=str, default='all:remote AND all:sensing', help="the query string, ti: xx, au: xx, all: xx,") 
     parser.add_argument("--key_word", type=str, default='remote sensing', help="the key word of user research fields")
     parser.add_argument("--filter_keys", type=str, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
-    parser.add_argument("--filter_times_span", type=float, default=9999, help='how many days of files to be filtered.')
+    parser.add_argument("--filter_times_span", type=float, default=4000, help='how many days of files to be filtered.')
     parser.add_argument("--max_results", type=int, default=999, help="the maximum number of results")
     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
     parser.add_argument("--file_format", type=str, default='md', help="导出的文件格式，如果存图片的话，最好是md，如果不是的话，txt的不会乱")
