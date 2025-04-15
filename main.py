@@ -710,7 +710,13 @@ if __name__ == '__main__':
     parser.add_argument("--pdf_path", type=str, default='', help="if none, the bot will download from arxiv with query")
     parser.add_argument("--query", type=str, default='all:remote AND all:sensing', help="the query string, ti: xx, au: xx, all: xx,") 
     parser.add_argument("--key_word", type=str, default='remote sensing', help="the key word of user research fields")
-    parser.add_argument("--filter_keys", type=str, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
+    # parser.add_argument("--filter_keys", type=str, default=KEYWORD_LIST, help="the filter key words, 摘要中每个单词都得有，才会被筛选为目标论文")
+    parser.add_argument(
+        "--filter_keys",
+        nargs='+',  # 使用空格分隔多个关键词
+        default=KEYWORD_LIST,
+        help="关键词列表"
+    )
     parser.add_argument("--filter_times_span", type=float, default=4000, help='how many days of files to be filtered.')
     parser.add_argument("--max_results", type=int, default=999, help="the maximum number of results")
     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
