@@ -189,7 +189,7 @@ class Reader:
             for f_key in filter_keys:
                 f_key_clean = f_key.lower().strip()
                 # 构造正则表达式，加上 \b 边界；如果关键词中包含空格，这会确保匹配到整个短语
-                pattern = re.compile(r'\b' + re.escape(f_key_clean) + r'\b')
+                pattern = re.compile(r'\b' + re.escape(f_key_clean) + r'\b', re.IGNORECASE)
                 if pattern.search(abs_text_lower) or pattern.search(title_text_lower):
                     print(f"✅ 关键词 '{f_key}' 命中: {title_text}")
                     filter_results.append(result)
