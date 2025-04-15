@@ -156,7 +156,7 @@ class Reader:
         return search
 # --------------------------   
     import tenacity
-
+    import re
     @tenacity.retry(
         wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
         stop=tenacity.stop_after_attempt(5),
@@ -181,15 +181,19 @@ class Reader:
 
             abs_text = result.summary.replace('-\n', '-').replace('\n', ' ')
             title_text = result.title
-            abs_text = abs_text.lower()
-            title_text = title_text.lower()
+            # 转换为小写处理
+            abs_text_lower = abs_text.lower()
+            title_text_lower = title_text.lower()
 
-            # 只要任意一个关键词命中即可
+            # 遍历每个关键词，使用正则表达式匹配整个关键词，确保匹配是完整短语
             for f_key in filter_keys:
-                if f_key.lower() in abs_text or f_key.lower() in title_text:
+                f_key_clean = f_key.lower().strip()
+                # 构造正则表达式，加上 \b 边界；如果关键词中包含空格，这会确保匹配到整个短语
+                pattern = re.compile(r'\b' + re.escape(f_key_clean) + r'\b')
+                if pattern.search(abs_text_lower) or pattern.search(title_text_lower):
                     print(f"✅ 关键词 '{f_key}' 命中: {title_text}")
                     filter_results.append(result)
-                    break
+                    break  # 命中一个即可，不必继续检查
 
         print("筛选后剩下的论文数量：", len(filter_results))
         for index, result in enumerate(filter_results):
