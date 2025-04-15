@@ -155,7 +155,7 @@ class Reader:
         stop=tenacity.stop_after_attempt(5),
         reraise=True
     )
-    def filter_arxiv(self, max_results=30):
+    def filter_arxiv(self, max_results=999):
         search = self.get_arxiv(max_results=max_results)
         print("all search:")
         results = list(search.results())  # 获取所有论文
