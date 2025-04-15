@@ -188,12 +188,21 @@ class Reader:
             # 遍历每个关键词，使用正则表达式匹配整个关键词，确保匹配是完整短语
             for f_key in filter_keys:
                 f_key_clean = f_key.lower().strip()
-                # 构造正则表达式，加上 \b 边界；如果关键词中包含空格，这会确保匹配到整个短语
                 pattern = re.compile(r'\b' + re.escape(f_key_clean) + r'\b', re.IGNORECASE)
-                if pattern.search(abs_text_lower) or pattern.search(title_text_lower):
-                    print(f"✅ 关键词 '{f_key}' 命中: {title_text}")
+
+                match_title = pattern.search(title_text)
+                match_abs = pattern.search(abs_text)
+
+                if match_title:
+                    print(f"✅ 关键词 '{f_key}' 命中标题: {title_text}")
+                    print(f"    ⤷ 匹配文本: {match_title.group(0)}")
                     filter_results.append(result)
-                    break  # 命中一个即可，不必继续检查
+                    break
+                elif match_abs:
+                    print(f"✅ 关键词 '{f_key}' 命中摘要: {title_text}")
+                    print(f"    ⤷ 匹配文本: {match_abs.group(0)}")
+                    filter_results.append(result)
+                    break
 
         print("筛选后剩下的论文数量：", len(filter_results))
         for index, result in enumerate(filter_results):
