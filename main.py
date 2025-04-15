@@ -125,7 +125,14 @@ class Reader:
         else:
             self.filter_times_span = filter_times_span
 
-        self.filter_keys = filter_keys
+        # self.filter_keys = filter_keys
+        # 确保 filter_keys 是列表
+        if isinstance(filter_keys, str):
+            self.filter_keys = [filter_keys]
+        else:
+            self.filter_keys = filter_keys
+        print("✅ 初始化 filter_keys 为:", self.filter_keys)
+
         self.root_path = root_path
 
         self.chat_api_list = [OPENAI_API_KEYS] if isinstance(OPENAI_API_KEYS, str) else []
