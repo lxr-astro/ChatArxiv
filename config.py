@@ -20,7 +20,7 @@ REPO_NAME = 'ChatArxiv'
 NEW_SUB_URL = 'https://arxiv.org/list/astro-ph.GA/recent'
 
 # Keywords to search
-KEYWORD_LIST = ["blackhole","M87","Brightest Cluster Galaxy","Brightest Cluster Galaxies","AGN","ALMA"]
+KEYWORD_LIST = ["Brightest Cluster Galaxy","Brightest Cluster Galaxies","AGN","ALMA","blackhole","blackholes","M87",]
 # KEYWORD_LIST = ["M87 review", "M87 overview", "M87 survey", "M87 literature review", "M87 jet review", "M87 AGN review"]
 # KEYWORD_LIST = ["Brightest Cluster Galaxies", "Brightest Cluster Galaxy"]
 
