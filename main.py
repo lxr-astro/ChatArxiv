@@ -146,13 +146,27 @@ class Reader:
 
 
                 
+    # def get_arxiv(self, max_results=99):
+    #     # https://info.arxiv.org/help/api/user-manual.html#query_details
+    #     search = arxiv.Search(query=self.query,
+    #                           max_results=max_results,
+    #                           sort_by=self.sort,
+    #                           sort_order=arxiv.SortOrder.Descending,
+    #                           )
+    #     return search
     def get_arxiv(self, max_results=99):
-        # https://info.arxiv.org/help/api/user-manual.html#query_details
-        search = arxiv.Search(query=self.query,
-                              max_results=max_results,                              
+        # Ensure the query includes the category filter for astro-ph.GA
+        category_filter = "cat:astro-ph.GA"
+        # If self.query is meant to include keywords, combine it with the category filter
+        if self.query:
+            full_query = f"{category_filter} AND {self.query}"
+        else:
+            full_query = category_filter
+        # Create the search object with the correct query
+        search = arxiv.Search(query=full_query,
+                              max_results=max_results,
                               sort_by=self.sort,
-                              sort_order=arxiv.SortOrder.Descending,
-                              )       
+                              sort_order=arxiv.SortOrder.Descending)
         return search
 # --------------------------   
     import tenacity
