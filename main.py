@@ -120,7 +120,7 @@ class Reader:
         # 处理 filter_times_span 默认值（每次都重新计算 now 和 yesterday）
         if filter_times_span is None:
             now = datetime.now(pytz.utc)
-            yesterday = now - timedelta(days=4000)
+            yesterday = now - timedelta(days=2)
             self.filter_times_span = (yesterday, now)
         else:
             self.filter_times_span = filter_times_span
@@ -737,7 +737,7 @@ if __name__ == '__main__':
         default=KEYWORD_LIST,
         help="关键词列表"
     )
-    parser.add_argument("--filter_times_span", type=float, default=4000, help='how many days of files to be filtered.')
+    parser.add_argument("--filter_times_span", type=float, default=2, help='how many days of files to be filtered.')
     parser.add_argument("--max_results", type=int, default=99, help="the maximum number of results")
     parser.add_argument("--sort", type=str, default="LastUpdatedDate", help="another is LastUpdatedDate | Relevance")
     parser.add_argument("--file_format", type=str, default='md', help="导出的文件格式，如果存图片的话，最好是md，如果不是的话，txt的不会乱")
