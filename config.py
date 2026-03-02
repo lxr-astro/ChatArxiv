@@ -23,7 +23,7 @@ GITHUB_REPO_NAME = os.getenv("GITHUB_REPO_NAME", "ChatArxiv")
 
 # ---------- arXiv ----------
 ARXIV_CATEGORY = os.getenv("ARXIV_CATEGORY", "astro-ph.GA")
-DAYS_BACK = float(os.getenv("DAYS_BACK", "2"))
+DAYS_BACK = float(os.getenv("DAYS_BACK", "3"))
 MAX_RESULTS = int(os.getenv("MAX_RESULTS", "99"))
 
 # ---------- Pipeline ----------
