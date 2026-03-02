@@ -32,7 +32,7 @@ KEYWORD_LIST = [
     x.strip()
     for x in os.getenv(
         "KEYWORD_LIST",
-        "AGN",
+        "AGN, blazar, BL Lac",
     ).split(",")
     if x.strip()
 ]
