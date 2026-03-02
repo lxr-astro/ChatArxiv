@@ -1,36 +1,38 @@
-# encoding: utf-8
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-# private token
+from __future__ import annotations
+
 import os
-from dotenv import load_dotenv
-load_dotenv()
 
-# Authentication for user filing issue (must have read/write access to repository to add issue to)
-USERNAME = 'lxr-astro'
-TOKEN = os.getenv("TOKEN")
+# ---------- Provider switch ----------
+# openai | gemini
+DEFAULT_PROVIDER = os.getenv("LLM_PROVIDER", "openai").lower()
 
-# The repository to add this issue to
-REPO_OWNER = 'lxr-astro'
-REPO_NAME = 'ChatArxiv'
+# OpenAI (gpt-5-nano)
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", os.getenv("OPENAI_API_KEYS", ""))
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5-nano")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "")
 
-# Set new submission url of subject
-NEW_SUB_URL = 'https://arxiv.org/list/astro-ph.GA/recent'
+# Gemini (gemini-3-pro-preview)
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-pro-preview")
+GEMINI_BASE_URL = os.getenv("GEMINI_BASE_URL", "")
 
-# Keywords to search
-KEYWORD_LIST = ["Brightest Cluster Galaxy","Brightest Cluster Galaxies","AGN","ALMA","blackhole","blackholes","M87",]
-# KEYWORD_LIST = ["M87 review", "M87 overview", "M87 survey", "M87 literature review", "M87 jet review", "M87 AGN review"]
-# KEYWORD_LIST = ["Brightest Cluster Galaxies", "Brightest Cluster Galaxy"]
+# ---------- GitHub ----------
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", os.getenv("TOKEN", ""))
+GITHUB_REPO_OWNER = os.getenv("GITHUB_REPO_OWNER", "lxr-astro")
+GITHUB_REPO_NAME = os.getenv("GITHUB_REPO_NAME", "ChatArxiv")
 
-# API???
-OPENAI_API_KEYS = os.getenv("OPENAI_API_KEYS")
-LANGUAGE = "zh"  # zh | en
+# ---------- arXiv ----------
+ARXIV_CATEGORY = os.getenv("ARXIV_CATEGORY", "astro-ph.GA")
+DAYS_BACK = float(os.getenv("DAYS_BACK", "2"))
+MAX_RESULTS = int(os.getenv("MAX_RESULTS", "99"))
 
-# 确保它是一个字符串，而不是字符列表
-# if not OPENAI_API_KEYS.startswith("sk-"):
-#     print(f"API Key 解析错误: {OPENAI_API_KEYS}")
-#     exit(1)
-#
-# print(f"Loaded OpenAI Key: {OPENAI_API_KEYS[:5]}********")
+# ---------- Pipeline ----------
+DEFAULT_LANGUAGE = os.getenv("LANGUAGE", "zh")
+KEYWORD_LIST = [
+    x.strip()
+    for x in os.getenv(
+        "KEYWORD_LIST",
+        "AGN",
+    ).split(",")
+    if x.strip()
+]

@@ -1,183 +1,90 @@
-# 日更文献订阅：搭建Arxiv论文日推流水线
+# ChatArxiv (Rewritten)
 
-## ⚠️ 25-06-25
+一个重写后的 arXiv 每日文献订阅项目，支持：
+- `gpt-5-nano`（OpenAI Responses API）
+- `gemini-3-pro-preview`（Google Generative Language API）
 
-由于arxiv出现http301错误，目前该仓库已经暂停workflow的触发
+并修复了旧版本 arXiv 301 问题：
+- 不再依赖旧 `arxiv` 包的老调用链
+- 统一改用 `https://export.arxiv.org/api/query`（HTTPS）
 
----
-
-（以下原文）
-
-**本节内容适用人群：科研工作者，想要了解Arxiv日更文章，跟紧学科最新进展的人群；**
-
-### 达成的效果
-
-根据本节内容，你能达成如下效果：
-
-```json
-把所感兴趣的日更Arxiv文章以及相关总结（由chatgpt生成），以issue的形式更新在你的github个人仓库中，仅需浏览每日issue，即可了解每日科研进展，无需人工检索，无需本地化部署。
-```
-
-展示个人仓库中的每日Issue：
-
-```json
-Issue构成：
-- #关键词
- - ##论文名称
-  - 论文链接、作者、摘要、chatgpt生成的总结
-```
-
-
-
-## 需求分析
-
-1、及时获取最新的感兴趣的arxiv论文，可以通过预设关键字，并匹配文章摘要，抓取感兴趣文章；
-
-2，利用chatgpt对匹配的文章进行总结摘要；
-
-3、自动化流程，通过github的action方法自动实现，定时操作（比如，每日更新一次），我们仅需查看特定仓库issue即可。
-
-## 总体原理
-
-1）利用python抓取特定Arxiv日更文章，下载匹配文章，利用ChatGPT API分析和总结文章内容，并形成issue，发布在个人github仓库中；
-
-2）使用Github Action实现云端部署和定时操作；
-
-## 快速上手
-
-### 1、复制Folk本仓库
-
-访问本仓库`https://github.com/justchenhao/ChatDailyPapers`，点击`Folk`克隆本仓库；
-
-修改仓库名称（创库名），例如 "hello-world"；
-
-该仓库用于承接每日推送的Arxiv文献信息。
-
-### 2、把复制的仓库克隆到本地
-
-克隆你的仓库到本地：
+## 1. 安装
 
 ```bash
-git clone https://github.com/XXX/xxx.git
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
 ```
 
-### 3、定义配置文件`config.py`：
-
-```python
-# Authentication for user filing issue (must have read/write access to repository to add issue to)
-USERNAME = 'changeme' #你的github账户名
-TOKEN = 'changeme' #你的个人访问令牌
-
-# The repository to add this issue to
-REPO_OWNER = 'changeme' #推送到的仓库拥有者账户名
-REPO_NAME = 'changeme' #推送到的仓库名
-
-# Set new submission url of subject
-NEW_SUB_URL = 'https://arxiv.org/list/cs/new'
-
-# Keywords to search
-KEYWORD_LIST = ["changeme"]
-
-OPENAI_API_KEYS = ["",]  # chatgpt的api
-LANGUAGE = "zh"  # zh | en # chatgpt返回的语言，中文zh或英文en
-```
-
-### 4、提交更新到Github
-
-在仓库根目录打开`bash`命令行，输入`git`推送命令：
+## 2. 配置环境变量
 
 ```bash
-git status # 查看有更新的文件
-git add.  # 缓存区增加文件
-git commit -m 'first commit' # 代码由缓存区提交到本地仓库区
-git push origin main  # 推送origin分支到远程main仓库
+# 任选一个 provider
+export LLM_PROVIDER=openai
+# export LLM_PROVIDER=gemini
+
+# OpenAI
+export OPENAI_API_KEY=your_openai_key
+export OPENAI_MODEL=gpt-5-nano
+
+# Gemini
+export GEMINI_API_KEY=your_gemini_key
+export GEMINI_MODEL=gemini-3-pro-preview
+
+# GitHub issue
+export GITHUB_TOKEN=your_github_token
+export GITHUB_REPO_OWNER=your_name
+export GITHUB_REPO_NAME=your_repo
+
+# arXiv + keywords
+export ARXIV_CATEGORY=astro-ph.GA
+export KEYWORD_LIST="AGN,M87,blackhole"
 ```
 
-推送成功后，你会在仓库主页看到Github Action开始运行，等待一些时间后，可以在issues中发现一条更新，点击进去查看即可，同时在仓库的`export`文件夹中新增一个`.md`文件，记录了完整issues的内容。
+## 3. 运行
 
-## 更多功能
+### 只生成 Markdown
 
-### 修改定时推送逻辑（可选）
-
-在仓库目录`.github/workflows/`，修改`main.yml`文件：
-
-```
-name: "daily allerts"
-on:
-  push:
-    branches:
-      - main
-  schedule:
-    -   cron: "10 20 * * 1,2,3,4,5"
-jobs:
-  backup:
-    runs-on: ubuntu-latest
-    name: Backup
-    timeout-minutes: 25
-    steps:
-      -   uses: actions/checkout@v2
-      -   name: Set up Python 3.9
-          uses: actions/setup-python@v1
-          with:
-            python-version: 3.9
-      -   name: Setup dependencies
-          run: |
-            if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-      -   name: Run backup
-          run: python main.py
-
-      -   name: Commit changes
-          uses: elstudio/actions-js-build/commit@v3
-          with:
-            commitMessage: Automated snapshot
+```bash
+python main.py --mode generate
 ```
 
-根据以上yml文件，github会定时触发预定流程（10 20 * * 1,2,3,4,5表示每周一,周二,周三,周四,周五的20:10，因为[arxiv](https://arxiv.org/help/submit)每天在零时区的20点更新，也就是说在东八区是每天4点更新，或者是在更新仓库后也会触发动作）； 具体触发过程：在指定环境下，安装依赖指定文件（由requirements.txt指定），然后执行`main.py`文件，最后，提交变化更新本仓库；
+### 生成并创建 GitHub Issue
 
-### 本地调试
-
-本地运行方法：
-
-```cmd
-python PATH-TO-CODE/main.py
+```bash
+python main.py --mode all
 ```
 
-本地调试过程中，可以在`main.py`中增加以下两行，支持本地代理：
+### 使用 OpenAI（gpt-5-nano）
 
-```python
-os.environ["http_proxy"] = "http://127.0.0.1:XXXX"   # 端口修改为本地代理端口
-os.environ["https_proxy"] = "http://127.0.0.1:XXXX"
+```bash
+python main.py --provider openai --model gpt-5-nano --mode all
 ```
 
+### 使用 Gemini（gemini-3-pro-preview）
 
-
-## Chatpaper
-
-本仓库对Arxiv论文的检索和文献总结功能的实现，参考的是[Chatpaper](https://github.com/kaixindelele/ChatPaper)。
-
-目前仅根据文献摘要和简介部分，进行以下5个问题的提问，使用者可以自行修改提示词，以实现更多定制化功能。
-
-```python
-- (1):What is the research background of this article?
-- (2):What are the past methods? What are the problems with them? What difference is the proposed approach from existing methods? How does the proposed method address the mentioned problems? Is the proposed approach well-motivated? 
-- (3):What is the contribution of the paper?
-- (4):What is the research methodology proposed in this paper?
-- (5):On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
+```bash
+python main.py --provider gemini --model gemini-3-pro-preview --mode all
 ```
 
+## 4. 常用参数
 
+```bash
+python main.py \
+  --provider openai \
+  --keywords AGN M87 \
+  --days-back 2 \
+  --max-results 99 \
+  --language zh \
+  --mode all
+```
 
-### 注意事项
+## 5. GitHub Action
 
-需要注意需要在本仓库的action设置中，把Workflow permissions改为read and write permission，以支持每日生成的`.md`文件正常上传到仓库。
+已提供 `.github/workflows/main.yml`，默认按 cron 定时运行，也支持手动触发。
 
-# 参考
+## 6. 说明
 
-Git常见操作方法：https://www.ruanyifeng.com/blog/2015/12/git-cheat-sheet.html
-
-arxiv文章自动issue：https://github.com/kobiso/get-daily-arxiv-noti
-
-配置github个人访问令牌：https://docs.github.com/cn/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token
-
-chatpaper：https://github.com/kaixindelele/ChatPaper
-
+- 默认统一入口 `main.py`，通过 `--provider` 切换模型供应商。
+- 若输出内容过长，Issue 会自动分片创建。
+- 若你更偏好“双文件版本”，可以在当前架构上再拆分为 `main_openai.py` 和 `main_gemini.py`，但核心逻辑已统一。 

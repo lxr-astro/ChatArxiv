@@ -1,16 +1,4 @@
-beautifulsoup4==4.6.3
-lxml
-arxiv
-PyMuPDF==1.21.1
-requests==2.26.0
-tiktoken==0.2.0
-tenacity==8.2.2
-pybase64==1.2.3
-Pillow==9.4.0
-openai==0.27.0
-markdown
-# new add
-numpy
-pytz
-python-dotenv # for private and venv .env
-tenacity
+feedparser>=6.0.11
+openai>=1.58.1
+python-dotenv>=1.0.1
+requests>=2.32.3
