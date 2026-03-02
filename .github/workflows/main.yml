@@ -17,7 +17,7 @@ jobs:
       OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
       GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.TOKEN || github.token }}
-      KEYWORD_LIST: ${{ vars.KEYWORD_LIST }}
+      KEYWORD_LIST: ${{ vars.KEYWORD_LIST || 'AGN, blazar, BL Lac' }}
       ARXIV_CATEGORY: ${{ vars.ARXIV_CATEGORY }}
       LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
       OPENAI_MODEL: gpt-5-nano

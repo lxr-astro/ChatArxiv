@@ -290,6 +290,8 @@ def run(args: argparse.Namespace) -> None:
 
     if not args.model:
         args.model = OPENAI_MODEL if args.provider == "openai" else GEMINI_MODEL
+    if not args.keywords:
+        raise ValueError("No keywords configured. Set KEYWORD_LIST or pass --keywords.")
     log(
         f"start mode={args.mode} provider={args.provider} model={args.model} "
         f"keywords={args.keywords} max_results={args.max_results}"

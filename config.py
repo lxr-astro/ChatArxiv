@@ -28,11 +28,9 @@ MAX_RESULTS = int(os.getenv("MAX_RESULTS", "99"))
 
 # ---------- Pipeline ----------
 DEFAULT_LANGUAGE = os.getenv("LANGUAGE", "zh")
-KEYWORD_LIST = [
-    x.strip()
-    for x in os.getenv(
-        "KEYWORD_LIST",
-        "AGN, blazar, BL Lac",
-    ).split(",")
-    if x.strip()
-]
+DEFAULT_KEYWORD_LIST = "AGN, blazar, BL Lac"
+_keyword_raw = os.getenv("KEYWORD_LIST")
+if _keyword_raw is None or not _keyword_raw.strip():
+    _keyword_raw = DEFAULT_KEYWORD_LIST
+
+KEYWORD_LIST = [x.strip() for x in _keyword_raw.split(",") if x.strip()]
