@@ -145,9 +145,17 @@ def filter_recent(papers: Iterable[Paper], days_back: float) -> List[Paper]:
 
 
 def query_for_keyword(keyword: str, category: str) -> str:
-    # category + tokenized all: terms keeps query behavior close to old project.
+    # Build a valid arXiv query even when category/keyword is empty.
+    category = (category or "").strip()
     terms = " AND ".join(f"all:{token}" for token in keyword.split() if token.strip())
-    return f"cat:{category} AND ({terms})" if terms else f"cat:{category}"
+
+    if category and terms:
+        return f"cat:{category} AND ({terms})"
+    if category:
+        return f"cat:{category}"
+    if terms:
+        return terms
+    raise ValueError("Both keyword and category are empty; cannot build arXiv query.")
 
 
 def build_prompt(paper: Paper, language: str) -> str:
@@ -392,13 +400,22 @@ def run(args: argparse.Namespace) -> None:
 def parse_args() -> argparse.Namespace:
     provider_default = (DEFAULT_PROVIDER or "openai").lower()
 
+    def _optional_int(value: str) -> int:
+        v = (value or "").strip()
+        if not v:
+            return MAX_RESULTS
+        try:
+            return int(v)
+        except ValueError as exc:
+            raise argparse.ArgumentTypeError(f"invalid int value: {value!r}") from exc
+
     parser = argparse.ArgumentParser(description="ChatArxiv v2")
     parser.add_argument("--provider", choices=["openai", "gemini"], default=provider_default)
     parser.add_argument("--model", default=None)
     parser.add_argument("--keywords", nargs="+", default=KEYWORD_LIST)
     parser.add_argument("--category", default=ARXIV_CATEGORY)
     parser.add_argument("--days-back", type=float, default=DAYS_BACK)
-    parser.add_argument("--max-results", type=int, default=MAX_RESULTS)
+    parser.add_argument("--max-results", type=_optional_int, default=MAX_RESULTS)
     parser.add_argument("--language", default=DEFAULT_LANGUAGE)
     parser.add_argument("--mode", choices=["generate", "create-issue", "all"], default="all")
     parser.add_argument("--output-dir", default="export")
